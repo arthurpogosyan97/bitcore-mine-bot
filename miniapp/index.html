@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>BitCore Mine</title>
+  <script src="https://telegram.org/js/telegram-web-app.js?62"></script>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div id="loader" class="loader-screen">
+    <div class="loader-core">
+      <img src="/assets/bitcore-coin.png" alt="">
+      <div class="loader-orbit"></div>
+      <div class="loader-orbit orbit-two"></div>
+    </div>
+    <h1>BitCore Mine</h1>
+    <p id="loaderText">Igniting the core...</p>
+    <div class="loader-bar"><span></span></div>
+  </div>
+
+  <main class="app-shell">
+    <section class="language-picker" aria-label="Language">
+      <button id="langToggle" class="lang-toggle" type="button">
+        <span data-i18n="language">Language</span>
+        <img id="currentLangFlag" class="flag-icon" src="/static/flags/en.svg" alt="">
+        <span class="chevron">⌄</span>
+      </button>
+      <div id="langMenu" class="lang-menu">
+        <button class="lang active" data-lang="en" type="button"><img class="flag-icon" src="/static/flags/en.svg" alt=""> English</button>
+        <button class="lang" data-lang="ru" type="button"><img class="flag-icon" src="/static/flags/ru.svg" alt=""> Русский</button>
+        <button class="lang" data-lang="kk" type="button"><img class="flag-icon" src="/static/flags/kk.svg" alt=""> Қазақша</button>
+        <button class="lang" data-lang="uz" type="button"><img class="flag-icon" src="/static/flags/uz.svg" alt=""> O'zbekcha</button>
+        <button class="lang" data-lang="az" type="button"><img class="flag-icon" src="/static/flags/az.svg" alt=""> Azərbaycanca</button>
+        <button class="lang" data-lang="hy" type="button"><img class="flag-icon" src="/static/flags/hy.svg" alt=""> Հայերեն</button>
+        <button class="lang" data-lang="ka" type="button"><img class="flag-icon" src="/static/flags/ka.svg" alt=""> ქართული</button>
+        <button class="lang" data-lang="ky" type="button"><img class="flag-icon" src="/static/flags/ky.svg" alt=""> Кыргызча</button>
+        <button class="lang" data-lang="tg" type="button"><img class="flag-icon" src="/static/flags/tg.svg" alt=""> Тоҷикӣ</button>
+        <button class="lang" data-lang="be" type="button"><img class="flag-icon" src="/static/flags/be.svg" alt=""> Беларуская</button>
+      </div>
+    </section>
+
+    <section class="profile-strip" aria-label="Profile">
+      <div>
+        <span data-i18n="profile">Profile</span>
+        <strong id="profileName">@miner</strong>
+      </div>
+      <div>
+        <span data-i18n="tapLevel">Tap Level</span>
+        <strong id="tapLevel">Lv.1</strong>
+      </div>
+      <button class="profile-ref-btn primary" data-modal="profileModal" type="button" data-i18n="openProfile">Open Profile</button>
+    </section>
+
+    <section class="mine-stage" aria-label="Mine status">
+      <div class="topbar">
+        <div>
+          <p class="eyebrow" data-i18n="brand">BitCore Mine</p>
+          <h1 id="tier">Starter Shaft</h1>
+        </div>
+        <div class="wallet">
+          <span id="coins">0</span>
+          <small data-i18n="coins">coins</small>
+        </div>
+      </div>
+
+      <div class="core-scene">
+        <div class="ring ring-one"></div>
+        <div class="ring ring-two"></div>
+        <button id="tapCoin" class="core coin-core" aria-label="Tap coin">
+          <img src="/assets/bitcore-coin.png" alt="">
+        </button>
+        <div id="tapFx" class="tap-fx"></div>
+        <div class="drill drill-left"></div>
+        <div class="drill drill-right"></div>
+      </div>
+
+      <p class="tap-hint" data-i18n="tapHint">Tap the BitCore coin to collect quick bits.</p>
+
+      <div class="energy-panel">
+        <div class="meter-label">
+          <span data-i18n="energy">Energy</span>
+          <strong id="energyText">0/0</strong>
+        </div>
+        <div class="meter-track">
+          <div id="energyBar" class="energy-fill"></div>
+        </div>
+        <button id="buyEnergyBtn" class="storage-collect energy-buy-hidden" data-modal="energyModal" data-i18n="buyEnergy">Buy Energy</button>
+      </div>
+
+      <div class="mine-meter">
+        <div class="meter-label">
+          <span data-i18n="storage">Storage</span>
+          <strong id="storageText">0/0</strong>
+        </div>
+        <div class="meter-track">
+          <div id="storageBar" class="meter-fill"></div>
+        </div>
+        <button id="collectBtn" class="storage-collect primary" data-i18n="collectCoins">Collect Coins</button>
+      </div>
+
+      <div class="stats-grid">
+        <div>
+          <small data-i18n="miningRate">Mining Rate</small>
+          <strong id="rate">0/h</strong>
+        </div>
+        <div>
+          <small data-i18n="energy">Energy</small>
+          <strong id="energy">0</strong>
+        </div>
+        <div>
+          <small data-i18n="rank">Rank</small>
+          <strong id="rank">-</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="actions" aria-label="Game actions">
+      <button id="openRatingBtn" data-modal="ratingModal" data-i18n="ratingTop">Top 100</button>
+      <button id="openUpgradesBtn" data-modal="upgradesModal" data-i18n="upgradeRig">Upgrade Rig</button>
+      <button data-modal="questsModal" data-i18n="quests">Quests</button>
+      <button data-modal="rewardsModal" data-i18n="rewards">Rewards</button>
+      <button data-modal="skinsModal" data-i18n="skins">Skins</button>
+      <button data-modal="teamModal" data-i18n="team">Team</button>
+    </section>
+
+    <section class="panel games-panel" aria-label="Mini games">
+      <div class="section-title">
+        <h2 data-i18n="playEarn">Play & Earn</h2>
+        <span data-i18n="miniGames">Mini games</span>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Mini game modes">
+        <button class="tab active" data-tab="drop" data-i18n="coreCatch">Core Catch</button>
+        <button class="tab" data-tab="wheel" data-i18n="wheel">Wheel</button>
+        <button class="tab" data-tab="launch" data-i18n="coreLaunch">Core Launch</button>
+      </div>
+
+      <div class="game-mode active" id="dropGame">
+        <div id="rainField" class="rain-field">
+          <div id="collector" class="collector"></div>
+        </div>
+        <div class="rain-controls">
+          <span id="rainScore">Caught: 0</span>
+          <button id="dropBtn" class="primary" data-i18n="startDrop">Start Drop</button>
+        </div>
+        <p class="game-copy" data-i18n="dropCopy">Move the collector and catch falling BitCore coins.</p>
+      </div>
+
+      <div class="game-mode" id="wheelGame">
+        <div class="wheel-wrap">
+          <div class="wheel-aura"></div>
+          <div class="wheel-pointer"></div>
+          <div class="wheel-rim">
+            <div id="wheelFace" class="wheel-face"></div>
+          </div>
+          <div class="wheel-center">
+            <span>BIT</span>
+            <img src="/assets/bitcore-coin.png" alt="">
+            <small>CORE</small>
+          </div>
+        </div>
+        <div id="wheelResult" class="wheel-result">
+          <strong data-i18n="wheelReady">Choose a bet and spin</strong>
+          <span data-i18n="wheelRisk">Risk your coins for a bigger prize.</span>
+        </div>
+        <div class="bet-row">
+          <button class="bet" data-bet="10">10</button>
+          <button class="bet active" data-bet="50">50</button>
+          <button class="bet" data-bet="100">100</button>
+        </div>
+        <button id="spinWheel" class="primary" data-i18n="spinWheel">Spin Wheel</button>
+      </div>
+
+      <div class="game-mode" id="launchGame">
+        <div id="launchStage" class="launch-stage">
+          <div class="launch-grid"></div>
+          <div class="launch-heat"></div>
+          <div class="launch-trail"></div>
+          <div id="launchCore" class="launch-core">
+            <img src="/assets/bitcore-coin.png" alt="">
+          </div>
+          <div class="launch-flame"></div>
+          <strong id="launchMultiplier">x1.00</strong>
+          <em id="launchRisk" class="launch-risk" data-i18n="riskStable">Stable</em>
+          <span id="launchStatus" data-i18n="launchReady">Choose a bet and launch the core</span>
+        </div>
+        <div class="bet-row">
+          <button class="launch-bet active" data-launch-bet="10">10</button>
+          <button class="launch-bet" data-launch-bet="50">50</button>
+          <button class="launch-bet" data-launch-bet="100">100</button>
+          <button class="launch-bet" data-launch-bet="500">500</button>
+        </div>
+        <div class="auto-cash-row" aria-label="Auto cash out">
+          <button class="auto-cash active" data-auto-cashout="0" data-i18n="autoOff">Auto: Off</button>
+          <button class="auto-cash" data-auto-cashout="1.5">Auto x1.5</button>
+          <button class="auto-cash" data-auto-cashout="2">Auto x2</button>
+          <button class="auto-cash" data-auto-cashout="3">Auto x3</button>
+        </div>
+        <div class="launch-actions">
+          <button id="startLaunch" class="primary" data-i18n="startLaunch">Launch Core</button>
+          <button id="cashoutLaunch" disabled data-i18n="cashoutLaunch">Cash Out</button>
+        </div>
+        <div id="launchHistory" class="launch-history" aria-label="Launch history"></div>
+        <p class="game-copy" data-i18n="launchCopy">Cash out before the BitCore reactor overheats.</p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <div id="profileModal" class="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 data-i18n="profile">Profile</h2>
+        <button class="icon-close" data-close-modal type="button">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="profile-card">
+          <div class="profile-head">
+            <div>
+              <span data-i18n="player">Player</span>
+              <strong id="profileFullName">@miner</strong>
+            </div>
+            <div>
+              <span data-i18n="status">Status</span>
+              <strong id="profileTier">Starter Shaft</strong>
+            </div>
+          </div>
+          <div class="profile-grid">
+            <div><span data-i18n="coins">coins</span><strong id="profileCoins">0</strong></div>
+            <div><span data-i18n="earnedTotal">Total Earned</span><strong id="profileEarned">0</strong></div>
+            <div><span data-i18n="energy">Energy</span><strong id="profileEnergy">0/0</strong></div>
+            <div><span data-i18n="storage">Storage</span><strong id="profileStorage">0/0</strong></div>
+            <div><span data-i18n="tapLevel">Tap Level</span><strong id="profileTapLevel">Lv.1</strong></div>
+            <div><span data-i18n="tapPower">Tap Power</span><strong id="profileTapPower">+1</strong></div>
+            <div><span data-i18n="referrals">Referrals</span><strong id="refCount">0</strong></div>
+          </div>
+          <div class="level-progress">
+            <div class="meter-label">
+              <span data-i18n="levelProgress">Level Progress</span>
+              <strong id="profileProgressText">0%</strong>
+            </div>
+            <div class="meter-track">
+              <div id="profileProgressBar" class="meter-fill"></div>
+            </div>
+          </div>
+          <div class="profile-note">
+            <strong data-i18n="tapLevelHow">How tap level grows</strong>
+            <p data-i18n="tapLevelRule">Every coin earned by tapping counts toward tap progress. Higher levels increase coins per tap.</p>
+          </div>
+          <div class="ref-card">
+            <strong data-i18n="refTitle">Invite miners</strong>
+            <p data-i18n="refCopy">Share your referral link. Later, invited players will bring you bonuses when they register and play.</p>
+            <code id="refLink">https://t.me/BitCoreMineBot</code>
+            <button id="copyRefBtn" class="primary" data-i18n="copyRef">Copy Link</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="ratingModal" class="modal">
+    <div class="modal-card modal-card-large">
+      <div class="modal-head">
+        <h2 data-i18n="ratingTop">Top 100 Players</h2>
+        <button class="icon-close" data-close-modal type="button">×</button>
+      </div>
+      <div id="top100List" class="top100-list"></div>
+    </div>
+  </div>
+
+  <div id="upgradesModal" class="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 data-i18n="upgradeRig">Upgrade Rig</h2>
+        <button class="icon-close" data-close-modal type="button">×</button>
+      </div>
+      <p class="modal-copy" data-i18n="upgradeCopy">Improve your rig to mine faster, store more, and build tap power.</p>
+      <div id="upgrades" class="upgrade-list"></div>
+      <div id="upgradePaymentStep" class="payment-step">
+        <strong id="selectedUpgradeText" data-i18n="selectUpgradeFirst">Select an upgrade first</strong>
+        <div class="payment-grid">
+          <button class="payment-option" data-upgrade-pay="stars" type="button">
+            <strong data-i18n="telegramStars">Telegram Stars</strong>
+            <span data-i18n="telegramStarsCopy">Fast in-app top-up</span>
+          </button>
+          <button class="payment-option" data-upgrade-pay="ton" type="button">
+            <strong data-i18n="tonWallet">TON Wallet</strong>
+            <span data-i18n="tonWalletCopy">Top up via TON wallet</span>
+          </button>
+        </div>
+        <button id="devUpgradeBtn" class="primary" type="button" data-i18n="testUpgrade">Test upgrade for coins</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="questsModal" class="modal">
+    <div class="modal-card modal-card-large">
+      <div class="modal-head">
+        <h2 data-i18n="quests">Quests</h2>
+        <button class="icon-close" data-close-modal type="button">×</button>
+      </div>
+      <p class="modal-copy" data-i18n="questsCopy">Complete daily goals and claim extra coins.</p>
+      <div id="questsList" class="feature-list"></div>
+      <h3 data-i18n="achievements">Achievements</h3>
+      <div id="achievementsList" class="feature-list"></div>
+    </div>
+  </div>
+
+  <div id="rewardsModal" class="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 data-i18n="rewards">Rewards</h2>
+        <button class="icon-close" data-close-modal type="button">×</button>
+      </div>
+      <div class="streak-card">
+        <span data-i18n="dailyStreak">Daily streak</span>
+        <strong id="dailyStreak">0</strong>
+      </div>
+      <button id="openChestBtn" class="primary" type="button" data-i18n="openChest">Open Chest</button>
+      <p class="modal-copy" data-i18n="chestCopy">Chest costs 75 coins and can drop coins, energy, or a booster.</p>
+      <div id="boostersList" class="feature-list"></div>
+    </div>
+  </div>
+
+  <div id="skinsModal" class="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 data-i18n="skins">Skins</h2>
+        <button class="icon-close" data-close-modal type="button">×</button>
+      </div>
+      <p class="modal-copy" data-i18n="skinsCopy">Collect BitCore coin skins and choose your active core.</p>
+      <div id="skinsList" class="feature-list"></div>
+    </div>
+  </div>
+
+  <div id="teamModal" class="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 data-i18n="team">Team</h2>
+        <button class="icon-close" data-close-modal type="button">×</button>
+      </div>
+      <div class="streak-card">
+        <span data-i18n="currentTeam">Current team</span>
+        <strong id="currentTeam">-</strong>
+      </div>
+      <div class="team-options">
+        <button data-team-name="BitCore Pool" type="button">BitCore Pool</button>
+        <button data-team-name="Neon Miners" type="button">Neon Miners</button>
+        <button data-team-name="Core Guild" type="button">Core Guild</button>
+      </div>
+      <p class="modal-copy" data-i18n="teamCopy">Teams are the base for future clan rankings and shared bonuses.</p>
+    </div>
+  </div>
+
+  <div id="energyModal" class="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 data-i18n="buyEnergy">Buy Energy</h2>
+        <button class="icon-close" data-close-modal type="button">×</button>
+      </div>
+      <p class="modal-copy" data-i18n="energyPayCopy">Choose how you want to refill energy. Payments will be connected later.</p>
+      <div class="tariff-grid">
+        <button class="tariff-option" data-energy-pack="starter" type="button">
+          <strong data-i18n="tariffStarter">Starter Charge</strong>
+          <span>+25 energy · 50 coins</span>
+        </button>
+        <button class="tariff-option" data-energy-pack="worker" type="button">
+          <strong data-i18n="tariffWorker">Worker Battery</strong>
+          <span>+60 energy · 110 coins</span>
+        </button>
+        <button class="tariff-option" data-energy-pack="reactor" type="button">
+          <strong data-i18n="tariffReactor">Reactor Pack</strong>
+          <span>+140 energy · 240 coins</span>
+        </button>
+        <button class="tariff-option" data-energy-pack="quantum" type="button">
+          <strong data-i18n="tariffQuantum">Quantum Cell</strong>
+          <span>+320 energy · 500 coins</span>
+        </button>
+        <button class="tariff-option" data-energy-pack="unlimited" type="button">
+          <strong data-i18n="tariffUnlimited">Overdrive Tank</strong>
+          <span>Full refill · 1200 coins</span>
+        </button>
+      </div>
+      <div id="energyPaymentStep" class="payment-step">
+        <strong id="selectedEnergyPack" data-i18n="selectTariffFirst">Select a tariff first</strong>
+        <div class="payment-grid">
+        <button class="payment-option" data-energy-pay="stars" type="button">
+          <strong data-i18n="telegramStars">Telegram Stars</strong>
+          <span data-i18n="telegramStarsCopy">Fast in-app top-up</span>
+        </button>
+        <button class="payment-option" data-energy-pay="ton" type="button">
+          <strong data-i18n="tonWallet">TON Wallet</strong>
+          <span data-i18n="tonWalletCopy">Top up via TON wallet</span>
+        </button>
+        </div>
+        <button id="devEnergyBtn" class="primary" type="button" data-i18n="testEnergy">Test refill for coins</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="dailyModal" class="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 data-i18n="dailyDrop">Daily Drop</h2>
+        <button class="icon-close" data-close-modal type="button">×</button>
+      </div>
+      <p class="modal-copy" data-i18n="dailyClaimCopy">Your daily core bonus is ready.</p>
+      <button id="dailyBtn" class="primary" type="button" data-i18n="claim">Claim</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
