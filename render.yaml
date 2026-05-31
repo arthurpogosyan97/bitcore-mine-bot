@@ -16,5 +16,3 @@ services:
         sync: false
       - key: ADMIN_IDS
         sync: false
-      - key: WEBAPP_DEV_USER_ID
-        sync: false

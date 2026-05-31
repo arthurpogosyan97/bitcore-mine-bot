@@ -46,6 +46,12 @@ def load_config() -> Config:
         else bool(is_render and mini_app_url)
     )
 
+    dev_user_id_raw = os.getenv("WEBAPP_DEV_USER_ID", "0").strip()
+    allow_dev_login = os.getenv("ALLOW_DEV_LOGIN", "").strip().lower() in {"1", "true", "yes", "on"}
+    webapp_dev_user_id = int(dev_user_id_raw) if dev_user_id_raw and dev_user_id_raw != "0" else None
+    if is_render and not allow_dev_login:
+        webapp_dev_user_id = None
+
     return Config(
         bot_token=bot_token,
         admin_ids=admin_ids,
@@ -54,12 +60,7 @@ def load_config() -> Config:
         public_base_url=mini_app_url.rstrip("/"),
         webapp_host=os.getenv("WEBAPP_HOST", "0.0.0.0" if is_render else "127.0.0.1").strip(),
         webapp_port=int(os.getenv("PORT", os.getenv("WEBAPP_PORT", "8080"))),
-        webapp_dev_user_id=(
-            int(os.getenv("WEBAPP_DEV_USER_ID", "0"))
-            if os.getenv("WEBAPP_DEV_USER_ID", "0").strip()
-            else None
-        )
-        or None,
+        webapp_dev_user_id=webapp_dev_user_id,
         use_webhook=use_webhook,
         webhook_path=os.getenv("WEBHOOK_PATH", "/telegram/webhook").strip() or "/telegram/webhook",
     )

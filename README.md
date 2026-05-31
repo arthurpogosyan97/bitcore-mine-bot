@@ -82,7 +82,6 @@ Environment variables to add in Render:
 ```env
 BOT_TOKEN=your_new_token_from_BotFather
 ADMIN_IDS=your_telegram_id
-WEBAPP_DEV_USER_ID=
 USE_WEBHOOK=true
 ```
 
