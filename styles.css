@@ -897,22 +897,6 @@ h2 { font-size: 18px; }
   text-align: center;
 }
 
-.launch-risk {
-  position: absolute;
-  right: 14px;
-  top: 16px;
-  z-index: 3;
-  padding: 7px 10px;
-  border: 1px solid rgba(70, 232, 255, 0.28);
-  border-radius: 999px;
-  background: rgba(9, 11, 18, 0.72);
-  color: var(--cyan);
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
 .launch-stage.running .launch-core {
   animation: launchFlight var(--flight-duration) ease-in-out infinite alternate;
   filter: drop-shadow(0 0 18px rgba(70, 232, 255, 0.65));
@@ -934,28 +918,6 @@ h2 { font-size: 18px; }
 .launch-stage.running .launch-flame {
   opacity: 1;
   animation: launchFlameFlight var(--flight-duration) ease-in-out infinite alternate;
-}
-
-.launch-stage.hot {
-  border-color: rgba(246, 199, 86, 0.52);
-}
-
-.launch-stage.hot .launch-risk {
-  border-color: rgba(246, 199, 86, 0.55);
-  color: var(--gold);
-}
-
-.launch-stage.danger {
-  border-color: rgba(255, 92, 122, 0.58);
-  background:
-    radial-gradient(circle at 50% 35%, rgba(255, 92, 122, 0.24), transparent 7rem),
-    radial-gradient(circle at 50% 95%, rgba(246, 199, 86, 0.2), transparent 8rem),
-    linear-gradient(180deg, #16101a 0%, #070b12 100%);
-}
-
-.launch-stage.danger .launch-risk {
-  border-color: rgba(255, 92, 122, 0.7);
-  color: var(--red);
 }
 
 .launch-stage.crashed .launch-core {

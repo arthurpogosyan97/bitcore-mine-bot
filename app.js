@@ -63,7 +63,6 @@ const elements = {
   launchStage: $("#launchStage"),
   launchCore: $("#launchCore"),
   launchMultiplier: $("#launchMultiplier"),
-  launchRisk: $("#launchRisk"),
   launchStatus: $("#launchStatus"),
   launchHistory: $("#launchHistory"),
   startLaunch: $("#startLaunch"),
@@ -121,9 +120,6 @@ const translations = {
     launchRunning: "Reactor is heating",
     launchCrashed: "Core overheated",
     launchCashed: "Core secured",
-    riskStable: "Stable",
-    riskHot: "Hot",
-    riskCritical: "Critical",
     autoOff: "Auto: Off",
     wheelReady: "Choose a bet and fire the reactor",
     wheelRisk: "Land on a charged sector before the core cools.",
@@ -222,9 +218,6 @@ const translations = {
     launchRunning: "Реактор нагревается",
     launchCrashed: "Ядро перегрелось",
     launchCashed: "Ядро сохранено",
-    riskStable: "Стабильно",
-    riskHot: "Горячо",
-    riskCritical: "Критично",
     autoOff: "Авто: выкл",
     wheelReady: "Выбери ставку и запусти реактор",
     wheelRisk: "Попади на заряженный сектор, пока ядро не остыло.",
@@ -358,7 +351,6 @@ function applyLanguage() {
   elements.rainScore.textContent = `${t("caught")}: 0`;
   if (!launchRound) {
     elements.launchStatus.textContent = t("launchReady");
-    elements.launchRisk.textContent = t("riskStable");
   }
 }
 
@@ -770,16 +762,6 @@ function configureLaunchFlight() {
   elements.launchStage.style.setProperty("--flight-duration", `${randomBetween(1050, 1550)}ms`);
 }
 
-function setLaunchRisk(level) {
-  elements.launchStage.classList.toggle("hot", level === "hot");
-  elements.launchStage.classList.toggle("danger", level === "critical");
-  elements.launchRisk.textContent = level === "critical"
-    ? t("riskCritical")
-    : level === "hot"
-      ? t("riskHot")
-      : t("riskStable");
-}
-
 function renderLaunchHistory() {
   elements.launchHistory.innerHTML = launchHistory
     .map((item) => `<span class="${item.status}">x${item.multiplier.toFixed(2)}</span>`)
@@ -791,9 +773,8 @@ function setLaunchIdle(message = t("launchReady")) {
   launchTimer = null;
   launchRound = null;
   launchCashoutPending = false;
-  elements.launchStage.classList.remove("running", "crashed", "cashed", "hot", "danger");
+  elements.launchStage.classList.remove("running", "crashed", "cashed");
   elements.launchMultiplier.textContent = "x1.00";
-  setLaunchRisk("stable");
   elements.launchStatus.textContent = message;
   elements.startLaunch.disabled = false;
   elements.cashoutLaunch.disabled = true;
@@ -804,11 +785,10 @@ function setLaunchResult(result) {
   launchTimer = null;
   launchRound = null;
   launchCashoutPending = false;
-  elements.launchStage.classList.remove("running", "crashed", "cashed", "hot", "danger");
+  elements.launchStage.classList.remove("running", "crashed", "cashed");
   elements.launchStage.classList.add(result.status === "cashed" ? "cashed" : "crashed");
   const multiplier = Number(result.multiplier || 1);
   elements.launchMultiplier.textContent = `x${multiplier.toFixed(2)}`;
-  elements.launchRisk.textContent = result.status === "cashed" ? t("riskStable") : t("riskCritical");
   elements.launchStatus.textContent = result.status === "cashed"
     ? `${t("launchCashed")} +${result.winnings}`
     : t("launchCrashed");
@@ -826,11 +806,10 @@ async function startCoreLaunch() {
   launchCashoutPending = false;
   elements.startLaunch.disabled = true;
   elements.cashoutLaunch.disabled = false;
-  elements.launchStage.classList.remove("crashed", "cashed", "hot", "danger");
+  elements.launchStage.classList.remove("crashed", "cashed");
   elements.launchStage.classList.add("running");
   elements.launchStatus.textContent = t("launchRunning");
   elements.launchMultiplier.textContent = "x1.00";
-  setLaunchRisk("stable");
   playTone("spin");
 
   try {
@@ -859,12 +838,6 @@ async function startCoreLaunch() {
       if (selectedAutoCashout && multiplier >= selectedAutoCashout && !launchCashoutPending) {
         cashoutCoreLaunch();
         return;
-      }
-      const progress = elapsedMs / launchRound.crashAfterMs;
-      if (progress > 0.78) {
-        setLaunchRisk("critical");
-      } else if (progress > 0.52) {
-        setLaunchRisk("hot");
       }
       if (elapsedMs >= launchRound.crashAfterMs) {
         cashoutCoreLaunch();

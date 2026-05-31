@@ -18,7 +18,7 @@ from game import BOOSTERS, SKINS, UPGRADES, mine_tier, rate_per_hour, storage_ca
 
 
 ROOT = Path(__file__).parent
-LAUNCH_GROWTH_PER_SECOND = 0.5
+LAUNCH_GROWTH_PER_SECOND = 1.0
 
 
 def validate_init_data(init_data: str, bot_token: str) -> dict:
@@ -350,19 +350,20 @@ async def roulette(request: web.Request) -> web.Response:
 
 def launch_crash_multiplier() -> float:
     tier = random.choices(
-        ["spark", "steady", "hot", "overdrive", "legend"],
-        weights=[25, 38, 22, 10, 5],
+        ["spark", "steady", "hot", "overdrive", "legend", "mythic"],
+        weights=[24, 34, 22, 12, 6, 2],
         k=1,
     )[0]
     ranges = {
         "spark": (1.05, 1.35),
         "steady": (1.36, 2.2),
         "hot": (2.21, 4.0),
-        "overdrive": (4.01, 8.0),
-        "legend": (8.01, 14.0),
+        "overdrive": (4.01, 10.0),
+        "legend": (10.01, 35.0),
+        "mythic": (35.01, 100.0),
     }
     low, high = ranges[tier]
-    return round(random.uniform(low, high), 2)
+    return min(100, round(random.uniform(low, high), 2))
 
 
 async def core_launch_start(request: web.Request) -> web.Response:
