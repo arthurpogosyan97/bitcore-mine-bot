@@ -108,6 +108,17 @@ class Database:
         )
         self.conn.execute(
             """
+            CREATE TABLE IF NOT EXISTS action_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                telegram_id INTEGER NOT NULL,
+                action TEXT NOT NULL,
+                amount INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL
+            )
+            """
+        )
+        self.conn.execute(
+            """
             INSERT OR IGNORE INTO player_skins (telegram_id, skin_key, bought_at)
             SELECT telegram_id, 'classic', created_at FROM players
             """
@@ -276,6 +287,8 @@ class Database:
         player = self.get_player(telegram_id)
         if not player:
             raise ValueError("Player not found")
+        if self.rate_limited(telegram_id, "tap", 1.0, 8):
+            return "too_fast", player, 0
 
         energy, _ = self.energy_state(player)
         player = self.get_player(telegram_id)
@@ -304,6 +317,7 @@ class Database:
             (new_stored, now, energy - 1, now, amount, telegram_id),
         )
         self.add_transaction(telegram_id, amount, "tap stored", commit=False)
+        self.log_action(telegram_id, "tap", amount, commit=False)
         self.conn.commit()
         return "ok", self.get_player(telegram_id), amount
 
@@ -385,6 +399,18 @@ class Database:
         ).fetchone()
         return int(row["count"])
 
+    def transaction_count_today(self, telegram_id: int, reason: str) -> int:
+        today = utc_now().date().isoformat()
+        row = self.conn.execute(
+            """
+            SELECT COUNT(*) AS count
+            FROM transactions
+            WHERE telegram_id = ? AND reason = ? AND substr(created_at, 1, 10) = ?
+            """,
+            (telegram_id, reason, today),
+        ).fetchone()
+        return int(row["count"])
+
     def referrals_count(self, telegram_id: int) -> int:
         row = self.conn.execute(
             "SELECT COUNT(*) AS count FROM players WHERE referrer_id = ?",
@@ -400,6 +426,11 @@ class Database:
             "collects": self.transaction_count(telegram_id, "mine collect"),
             "launches": self.transaction_count(telegram_id, "core launch bet"),
             "wheels": self.transaction_count(telegram_id, "roulette bet"),
+            "daily_collects": self.transaction_count_today(telegram_id, "mine collect"),
+            "daily_launches": self.transaction_count_today(telegram_id, "core launch bet"),
+            "daily_wheels": self.transaction_count_today(telegram_id, "roulette bet"),
+            "daily_taps": self.action_sum_today(telegram_id, "tap"),
+            "daily_catches": self.action_sum_today(telegram_id, "falling catch"),
             "referrals": self.referrals_count(telegram_id),
         }
 
@@ -415,9 +446,12 @@ class Database:
         }
         progress_map = {
             "tap_25": (min(stats["tap_total"], 25), 25),
-            "collect_1": (min(stats["collects"], 1), 1),
-            "launch_1": (min(stats["launches"], 1), 1),
-            "wheel_1": (min(stats["wheels"], 1), 1),
+            "tap_100_daily": (min(stats["daily_taps"], 100), 100),
+            "collect_1": (min(stats["daily_collects"], 1), 1),
+            "launch_1": (min(stats["daily_launches"], 1), 1),
+            "launch_3": (min(stats["daily_launches"], 3), 3),
+            "wheel_1": (min(stats["daily_wheels"], 1), 1),
+            "catch_20": (min(stats["daily_catches"], 20), 20),
         }
         quests = []
         for quest in DAILY_QUESTS:
@@ -458,6 +492,7 @@ class Database:
             "rich_1000": stats["coins"] >= 1000,
             "ref_1": stats["referrals"] >= 1,
             "ref_5": stats["referrals"] >= 5,
+            "ref_10": stats["referrals"] >= 10,
         }
         return [{**item, "done": done_map[item["key"]], "claimed": item["key"] in claimed} for item in ACHIEVEMENTS]
 
@@ -495,7 +530,7 @@ class Database:
             return False, player, 0
         if paid and player["coins"] < booster["cost"]:
             return False, player, booster["cost"]
-        column = "tap_boost_until" if booster_key == "tap_x2" else "mine_boost_until"
+        column = "tap_boost_until" if booster_key in {"tap_x2", "tap_long"} else "mine_boost_until"
         until = to_iso(utc_now() + timedelta(minutes=booster["minutes"]))
         if paid:
             self.conn.execute("UPDATE players SET coins = coins - ?, " + column + " = ? WHERE telegram_id = ?", (booster["cost"], until, telegram_id))
@@ -594,6 +629,41 @@ class Database:
         self.add_transaction(telegram_id, -amount, reason, commit=False)
         self.conn.commit()
         return self.get_player(telegram_id)
+
+    def rate_limited(self, telegram_id: int, action: str, seconds: float, limit: int) -> bool:
+        cutoff = to_iso(utc_now() - timedelta(seconds=seconds))
+        row = self.conn.execute(
+            """
+            SELECT COUNT(*) AS count
+            FROM action_events
+            WHERE telegram_id = ? AND action = ? AND created_at >= ?
+            """,
+            (telegram_id, action, cutoff),
+        ).fetchone()
+        return int(row["count"]) >= limit
+
+    def action_sum_today(self, telegram_id: int, action: str) -> int:
+        today = utc_now().date().isoformat()
+        row = self.conn.execute(
+            """
+            SELECT COALESCE(SUM(amount), 0) AS total
+            FROM action_events
+            WHERE telegram_id = ? AND action = ? AND substr(created_at, 1, 10) = ?
+            """,
+            (telegram_id, action, today),
+        ).fetchone()
+        return int(row["total"])
+
+    def log_action(self, telegram_id: int, action: str, amount: int = 1, *, commit: bool = True) -> None:
+        self.conn.execute(
+            """
+            INSERT INTO action_events (telegram_id, action, amount, created_at)
+            VALUES (?, ?, ?, ?)
+            """,
+            (telegram_id, action, amount, to_iso(utc_now())),
+        )
+        if commit:
+            self.conn.commit()
 
     def add_transaction(
         self,

@@ -49,6 +49,10 @@
         <span data-i18n="tapLevel">Tap Level</span>
         <strong id="tapLevel">Lv.1</strong>
       </div>
+      <div>
+        <span data-i18n="league">League</span>
+        <strong id="leagueName">Bronze</strong>
+      </div>
       <button class="profile-ref-btn primary" data-modal="profileModal" type="button" data-i18n="openProfile">Open Profile</button>
     </section>
 
@@ -231,6 +235,7 @@
             <div><span data-i18n="earnedTotal">Total Earned</span><strong id="profileEarned">0</strong></div>
             <div><span data-i18n="energy">Energy</span><strong id="profileEnergy">0/0</strong></div>
             <div><span data-i18n="storage">Storage</span><strong id="profileStorage">0/0</strong></div>
+            <div><span data-i18n="league">League</span><strong id="profileLeague">Bronze</strong></div>
             <div><span data-i18n="tapLevel">Tap Level</span><strong id="profileTapLevel">Lv.1</strong></div>
             <div><span data-i18n="tapPower">Tap Power</span><strong id="profileTapPower">+1</strong></div>
             <div><span data-i18n="referrals">Referrals</span><strong id="refCount">0</strong></div>
@@ -407,6 +412,30 @@
       </div>
       <p class="modal-copy" data-i18n="dailyClaimCopy">Your daily core bonus is ready.</p>
       <button id="dailyBtn" class="primary" type="button" data-i18n="claim">Claim</button>
+    </div>
+  </div>
+
+  <div id="onboardingModal" class="modal">
+    <div class="modal-card onboarding-card">
+      <div class="modal-head">
+        <h2 data-i18n="welcomeTitle">Welcome to BitCore Mine</h2>
+        <button class="icon-close" data-close-modal type="button">×</button>
+      </div>
+      <div class="onboarding-steps">
+        <article>
+          <strong data-i18n="onboardTapTitle">Tap the core</strong>
+          <p data-i18n="onboardTapCopy">Use energy to fill storage with BitCore coins.</p>
+        </article>
+        <article>
+          <strong data-i18n="onboardCollectTitle">Collect storage</strong>
+          <p data-i18n="onboardCollectCopy">Move stored coins into your wallet before the vault fills.</p>
+        </article>
+        <article>
+          <strong data-i18n="onboardUpgradeTitle">Upgrade and risk</strong>
+          <p data-i18n="onboardUpgradeCopy">Upgrade your rig, complete quests, and play mini games for bigger rewards.</p>
+        </article>
+      </div>
+      <button id="onboardingDoneBtn" class="primary" type="button" data-i18n="startPlaying">Start Playing</button>
     </div>
   </div>
 

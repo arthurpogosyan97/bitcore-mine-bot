@@ -13,9 +13,12 @@ REFERRAL_BONUS = 500
 
 DAILY_QUESTS = [
     {"key": "tap_25", "title": "Tap 25 times", "description": "Charge the BitCore coin by tapping.", "reward": 75},
+    {"key": "tap_100_daily", "title": "Tap 100 times", "description": "Push the core harder in one day.", "reward": 160},
     {"key": "collect_1", "title": "Collect storage", "description": "Move mined coins from storage to wallet.", "reward": 90},
     {"key": "launch_1", "title": "Play Core Launch", "description": "Start one reactor launch round.", "reward": 120},
+    {"key": "launch_3", "title": "Launch streak", "description": "Play Core Launch 3 times.", "reward": 220},
     {"key": "wheel_1", "title": "Spin the Wheel", "description": "Take one wheel risk.", "reward": 100},
+    {"key": "catch_20", "title": "Catch 20 cores", "description": "Catch 20 falling BitCore coins.", "reward": 180},
 ]
 
 ACHIEVEMENTS = [
@@ -26,11 +29,13 @@ ACHIEVEMENTS = [
     {"key": "rich_1000", "title": "First Thousand", "description": "Hold 1,000 coins.", "reward": 500},
     {"key": "ref_1", "title": "First Recruit", "description": "Invite 1 miner.", "reward": 250},
     {"key": "ref_5", "title": "Mining Crew", "description": "Invite 5 miners.", "reward": 900},
+    {"key": "ref_10", "title": "Core Network", "description": "Invite 10 miners.", "reward": 1800},
 ]
 
 BOOSTERS = {
     "tap_x2": {"title": "Tap Overdrive", "description": "x2 tap power for 5 minutes.", "cost": 180, "minutes": 5},
     "mine_x2": {"title": "Mine Surge", "description": "x2 passive mining for 1 hour.", "cost": 260, "minutes": 60},
+    "tap_long": {"title": "Core Frenzy", "description": "x2 tap power for 15 minutes.", "cost": 420, "minutes": 15},
 }
 
 SKINS = {
@@ -113,6 +118,36 @@ def storage_capacity(storage_level: int) -> int:
 
 def max_energy(generator_level: int) -> int:
     return MAX_ENERGY_BASE + (generator_level - 1) * 8
+
+
+def league_for(coins: int) -> dict:
+    leagues = [
+        ("Bronze", 0),
+        ("Silver", 1_000),
+        ("Gold", 5_000),
+        ("Platinum", 20_000),
+        ("Diamond", 75_000),
+        ("BitCore Elite", 250_000),
+    ]
+    current = leagues[0]
+    next_league = None
+    for league in leagues:
+        if coins >= league[1]:
+            current = league
+        elif next_league is None:
+            next_league = league
+            break
+
+    progress = 100
+    if next_league:
+        progress = int(((coins - current[1]) / (next_league[1] - current[1])) * 100)
+    return {
+        "name": current[0],
+        "required": current[1],
+        "next": next_league[0] if next_league else "",
+        "nextRequired": next_league[1] if next_league else current[1],
+        "progress": max(0, min(progress, 100)),
+    }
 
 
 def tap_level_for(total_tapped: int) -> dict:

@@ -14,7 +14,7 @@ from aiohttp import web
 
 from config import Config
 from db import Database
-from game import BOOSTERS, SKINS, UPGRADES, mine_tier, rate_per_hour, storage_capacity, tap_level_for
+from game import BOOSTERS, SKINS, UPGRADES, league_for, mine_tier, rate_per_hour, storage_capacity, tap_level_for
 
 
 ROOT = Path(__file__).parent
@@ -75,6 +75,7 @@ def public_state(db: Database, player) -> dict:
             "energy": energy,
             "energyCap": energy_cap,
             "tier": mine_tier(player["generator_level"]),
+            "league": league_for(player["coins"]),
             "rate": rate_per_hour(player["drill_level"], player["generator_level"]),
             "pending": pending,
             "capacity": capacity,
@@ -274,6 +275,9 @@ async def tap_coin(request: web.Request) -> web.Response:
     if status == "no_energy":
         payload["toast"] = "Energy is empty. Buy energy or wait."
         return web.json_response(payload, status=409)
+    if status == "too_fast":
+        payload["toast"] = "Too fast. Let the core cool for a second."
+        return web.json_response(payload, status=429)
     if status == "storage_full":
         payload["toast"] = "Storage is full. Collect coins first."
         return web.json_response(payload, status=409)
@@ -295,8 +299,15 @@ async def buy_energy(request: web.Request) -> web.Response:
 
 async def falling_reward(request: web.Request) -> web.Response:
     player = get_authorized_player(request)
+    if request.app["db"].rate_limited(player["telegram_id"], "falling reward", 20, 2):
+        payload = public_state(request.app["db"], player)
+        payload["toast"] = "Core Catch is cooling down"
+        return web.json_response(payload, status=429)
     data = await request.json()
     caught = max(0, min(int(data.get("caught", 0)), 50))
+    request.app["db"].log_action(player["telegram_id"], "falling reward", 1)
+    if caught:
+        request.app["db"].log_action(player["telegram_id"], "falling catch", caught)
     reward = caught * 2
     updated = request.app["db"].add_coins(player["telegram_id"], reward, "falling coins") if reward else player
     payload = public_state(request.app["db"], updated)
@@ -307,6 +318,10 @@ async def falling_reward(request: web.Request) -> web.Response:
 
 async def roulette(request: web.Request) -> web.Response:
     player = get_authorized_player(request)
+    if request.app["db"].rate_limited(player["telegram_id"], "roulette", 3, 1):
+        payload = public_state(request.app["db"], player)
+        payload["toast"] = "Reactor wheel is cooling down"
+        return web.json_response(payload, status=429)
     data = await request.json()
     bet = max(10, min(int(data.get("bet", 10)), 500))
     if player["coins"] < bet:
@@ -315,6 +330,7 @@ async def roulette(request: web.Request) -> web.Response:
         return web.json_response(payload, status=409)
 
     request.app["db"].spend_coins(player["telegram_id"], bet, "roulette bet")
+    request.app["db"].log_action(player["telegram_id"], "roulette", 1)
     sectors = [
         {"label": "0", "kind": "miss", "amount": 0, "weight": 24},
         {"label": "+10", "kind": "coin", "amount": 10, "weight": 18},
@@ -368,6 +384,10 @@ def launch_crash_multiplier() -> float:
 
 async def core_launch_start(request: web.Request) -> web.Response:
     player = get_authorized_player(request)
+    if request.app["db"].rate_limited(player["telegram_id"], "core launch", 3, 1):
+        payload = public_state(request.app["db"], player)
+        payload["toast"] = "Core launcher is cooling down"
+        return web.json_response(payload, status=429)
     data = await request.json()
     bet = max(10, min(int(data.get("bet", 10)), 500))
     if player["coins"] < bet:
@@ -376,6 +396,7 @@ async def core_launch_start(request: web.Request) -> web.Response:
         return web.json_response(payload, status=409)
 
     request.app["db"].spend_coins(player["telegram_id"], bet, "core launch bet")
+    request.app["db"].log_action(player["telegram_id"], "core launch", 1)
     crash_multiplier = launch_crash_multiplier()
     crash_after = max(0.8, (crash_multiplier - 1) / LAUNCH_GROWTH_PER_SECOND)
     round_id = uuid.uuid4().hex

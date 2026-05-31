@@ -153,7 +153,7 @@ button:disabled { opacity: 0.55; }
 
 .profile-strip {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto auto auto;
   gap: 10px;
   margin-bottom: 12px;
   padding: 12px;
@@ -1238,6 +1238,34 @@ h2 { font-size: 18px; }
   display: grid;
   gap: 10px;
   margin: 12px 0;
+}
+
+.onboarding-card {
+  overflow: hidden;
+}
+
+.onboarding-steps {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.onboarding-steps article {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(70, 232, 255, 0.1), rgba(246, 199, 86, 0.08));
+}
+
+.onboarding-steps strong {
+  display: block;
+}
+
+.onboarding-steps p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
 }
 
 @media (max-width: 390px) {

@@ -11,12 +11,14 @@ const elements = {
   currentLangFlag: $("#currentLangFlag"),
   tier: $("#tier"),
   profileName: $("#profileName"),
+  leagueName: $("#leagueName"),
   profileFullName: $("#profileFullName"),
   profileTier: $("#profileTier"),
   profileCoins: $("#profileCoins"),
   profileEarned: $("#profileEarned"),
   profileEnergy: $("#profileEnergy"),
   profileStorage: $("#profileStorage"),
+  profileLeague: $("#profileLeague"),
   profileTapLevel: $("#profileTapLevel"),
   profileTapPower: $("#profileTapPower"),
   profileProgressText: $("#profileProgressText"),
@@ -69,6 +71,7 @@ const elements = {
   cashoutLaunch: $("#cashoutLaunch"),
   refLink: $("#refLink"),
   copyRefBtn: $("#copyRefBtn"),
+  onboardingDoneBtn: $("#onboardingDoneBtn"),
 };
 
 const languages = {
@@ -102,6 +105,7 @@ const translations = {
     player: "Player",
     status: "Status",
     tapLevel: "Tap Level",
+    league: "League",
     tapPower: "Tap Power",
     levelProgress: "Level Progress",
     playEarn: "Play & Earn",
@@ -176,6 +180,14 @@ const translations = {
     testUpgrade: "Test upgrade for coins",
     claim: "Claim",
     dailyClaimCopy: "Your daily core bonus is ready.",
+    welcomeTitle: "Welcome to BitCore Mine",
+    onboardTapTitle: "Tap the core",
+    onboardTapCopy: "Use energy to fill storage with BitCore coins.",
+    onboardCollectTitle: "Collect storage",
+    onboardCollectCopy: "Move stored coins into your wallet before the vault fills.",
+    onboardUpgradeTitle: "Upgrade and risk",
+    onboardUpgradeCopy: "Upgrade your rig, complete quests, and play mini games for bigger rewards.",
+    startPlaying: "Start Playing",
     upgrade_drill_title: "Plasma Drill",
     upgrade_drill_desc: "Increases passive coin mining.",
     upgrade_generator_title: "Bit Reactor",
@@ -200,6 +212,7 @@ const translations = {
     player: "Игрок",
     status: "Статус",
     tapLevel: "Уровень тапа",
+    league: "Лига",
     tapPower: "Сила тапа",
     levelProgress: "Прогресс уровня",
     playEarn: "Играй и добывай",
@@ -274,6 +287,14 @@ const translations = {
     testUpgrade: "Тестовая покупка за монеты",
     claim: "Забрать",
     dailyClaimCopy: "Твой дневной бонус ядра готов.",
+    welcomeTitle: "Добро пожаловать в BitCore Mine",
+    onboardTapTitle: "Тапай по ядру",
+    onboardTapCopy: "Трать энергию, чтобы заполнять хранилище монетами BitCore.",
+    onboardCollectTitle: "Собирай хранилище",
+    onboardCollectCopy: "Переводи монеты в кошелек до того, как хранилище заполнится.",
+    onboardUpgradeTitle: "Улучшай и рискуй",
+    onboardUpgradeCopy: "Прокачивай установку, выполняй задания и играй в мини-игры ради больших наград.",
+    startPlaying: "Начать игру",
     upgrade_drill_title: "Плазменный бур",
     upgrade_drill_desc: "Увеличивает пассивную добычу монет.",
     upgrade_generator_title: "Бит-реактор",
@@ -319,6 +340,7 @@ let launchCashoutPending = false;
 let launchHistory = [];
 let lastTouchEnd = 0;
 let lastTapCoinTouch = 0;
+let onboardingShown = localStorage.getItem("bitcore_onboarding_done") === "1";
 let currentLang = localStorage.getItem("bitcore_lang") || "en";
 let audioContext;
 
@@ -512,6 +534,7 @@ function render(state) {
   const player = state.player;
   elements.tier.textContent = player.tier;
   elements.profileName.textContent = player.username ? `@${player.username}` : player.name;
+  elements.leagueName.textContent = player.league?.name || "Bronze";
   elements.tapLevel.textContent = `Lv.${player.tap.level} ${player.tap.title}`;
   elements.profileFullName.textContent = player.username ? `@${player.username}` : player.name;
   elements.profileTier.textContent = player.tier;
@@ -519,6 +542,9 @@ function render(state) {
   elements.profileEarned.textContent = player.earnedTotal.toLocaleString();
   elements.profileEnergy.textContent = `${player.energy}/${player.energyCap}`;
   elements.profileStorage.textContent = `${player.pending}/${player.capacity}`;
+  elements.profileLeague.textContent = player.league?.next
+    ? `${player.league.name} · ${player.league.progress}%`
+    : player.league?.name || "Bronze";
   elements.profileTapLevel.textContent = `Lv.${player.tap.level} ${player.tap.title}`;
   elements.profileTapPower.textContent = `+${player.tap.tapPower}`;
   elements.profileProgressText.textContent = `${player.tap.progress}%`;
@@ -534,9 +560,15 @@ function render(state) {
   elements.energyBar.style.width = `${Math.round((player.energy / player.energyCap) * 100)}%`;
   elements.buyEnergyBtn.classList.toggle("energy-buy-hidden", player.energy > 0);
   elements.buyEnergyBtn.classList.toggle("energy-buy-visible", player.energy <= 0);
+  if (!onboardingShown) {
+    onboardingShown = true;
+    window.setTimeout(() => openModal("onboardingModal"), 450);
+  }
   if (player.dailyAvailable && !dailyShown) {
     dailyShown = true;
-    window.setTimeout(() => openModal("dailyModal"), 500);
+    window.setTimeout(() => {
+      openModal("dailyModal");
+    }, localStorage.getItem("bitcore_onboarding_done") === "1" ? 500 : 1600);
   }
   if (elements.playerName) elements.playerName.textContent = player.name;
   elements.refLink.textContent = player.referralLink;
@@ -901,6 +933,11 @@ elements.dailyBtn.addEventListener("click", () => {
     closeModals();
     return state;
   });
+});
+
+elements.onboardingDoneBtn.addEventListener("click", () => {
+  localStorage.setItem("bitcore_onboarding_done", "1");
+  closeModals();
 });
 
 elements.questsList.addEventListener("click", (event) => {
