@@ -324,6 +324,8 @@ let launchRound = null;
 let launchTimer = null;
 let launchCashoutPending = false;
 let launchHistory = [];
+let lastTouchEnd = 0;
+let lastTapCoinTouch = 0;
 let currentLang = localStorage.getItem("bitcore_lang") || "en";
 let audioContext;
 
@@ -1082,10 +1084,36 @@ document.querySelectorAll(".modal").forEach((modal) => {
   });
 });
 
-elements.tapCoin.addEventListener("click", () => {
+function handleTapCoin() {
   tapEffect();
   runAction(elements.tapCoin, () => api("/api/tap", { method: "POST", body: "{}" }));
+}
+
+elements.tapCoin.addEventListener("touchstart", (event) => {
+  event.preventDefault();
+  lastTapCoinTouch = Date.now();
+  handleTapCoin();
+}, { passive: false });
+
+elements.tapCoin.addEventListener("click", (event) => {
+  if (Date.now() - lastTapCoinTouch < 550) {
+    event.preventDefault();
+    return;
+  }
+  handleTapCoin();
 });
+
+document.addEventListener("dblclick", (event) => event.preventDefault(), { passive: false });
+document.addEventListener("gesturestart", (event) => event.preventDefault());
+document.addEventListener("gesturechange", (event) => event.preventDefault());
+document.addEventListener("gestureend", (event) => event.preventDefault());
+document.addEventListener("touchend", (event) => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 320) {
+    event.preventDefault();
+  }
+  lastTouchEnd = now;
+}, { passive: false });
 
 document.querySelectorAll(".bet").forEach((button) => {
   button.addEventListener("click", () => {
