@@ -10,6 +10,7 @@ from game import (
     START_COINS,
     START_ENERGY,
     ENERGY_REGEN_SECONDS,
+    REFERRAL_BONUS,
     ACHIEVEMENTS,
     BOOSTERS,
     CHEST_REWARDS,
@@ -185,9 +186,9 @@ class Database:
         )
         self.conn.execute(
             "UPDATE players SET coins = coins + ? WHERE telegram_id = ?",
-            (100, referrer_id),
+            (REFERRAL_BONUS, referrer_id),
         )
-        self.add_transaction(referrer_id, 100, "referral bonus", commit=False)
+        self.add_transaction(referrer_id, REFERRAL_BONUS, "referral bonus", commit=False)
         self.conn.commit()
         return True
 

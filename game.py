@@ -9,6 +9,7 @@ BASE_STORAGE = 120
 BASE_RATE_PER_HOUR = 18
 MAX_ENERGY_BASE = 40
 ENERGY_REGEN_SECONDS = 90
+REFERRAL_BONUS = 500
 
 DAILY_QUESTS = [
     {"key": "tap_25", "title": "Tap 25 times", "description": "Charge the BitCore coin by tapping.", "reward": 75},
